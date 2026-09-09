@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#191919">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Vault">
+  <title>Vault</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <section id="authView" class="auth-view" aria-live="polite">
+      <div class="auth-card">
+        <h1 class="auth-title">VAULT</h1>
+        <p id="authCopy" class="auth-copy">Create a master password. Your notes stay on this device and are encrypted before storage.</p>
+        <form id="authForm" class="stack" autocomplete="off">
+          <label class="field-label" for="passwordInput">Master password</label>
+          <input id="passwordInput" class="text-input" type="password" minlength="8" required autocomplete="current-password" spellcheck="false">
+          <label id="confirmWrap" class="field-label" for="confirmInput">Confirm password</label>
+          <input id="confirmInput" class="text-input" type="password" minlength="8" autocomplete="new-password" spellcheck="false">
+          <button id="authSubmit" class="primary-button" type="submit">Create vault</button>
+          <p id="authError" class="error-text" role="alert"></p>
+        </form>
+      </div>
+    </section>
+
+    <section id="mainView" class="main-view hidden">
+      <header class="topbar">
+        <div>
+          <h1 class="menu-title">VAULT</h1>
+        </div>
+        <div class="top-actions">
+          <button id="settingsButton" class="icon-button" type="button" aria-label="Open settings" title="Settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.6v-.1a1.7 1.7 0 0 0-.4-1.1 1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 3.8 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2V9.6h.1a1.7 1.7 0 0 0 1.1-.4 1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88L3.4 6.26 6.26 3.4l.06.06A1.7 1.7 0 0 0 8.2 3.8a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V2h4v.1a1.7 1.7 0 0 0 .4 1.1 1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06A1.7 1.7 0 0 0 19.4 8.2a1.7 1.7 0 0 0 .6 1 1.7 1.7 0 0 0 1.1.4h.1v4h-.1a1.7 1.7 0 0 0-1.1.4 1.7 1.7 0 0 0-.6 1Z"/></svg>
+          </button>
+          <button id="themeButton" class="icon-button" type="button" aria-label="Switch theme" title="Switch theme">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.64 5.64l1.42 1.42M16.94 16.94l1.42 1.42M18.36 5.64l-1.42 1.42M7.06 16.94l-1.42 1.42"/><circle cx="12" cy="12" r="4"/></svg>
+          </button>
+          <button id="lockButton" class="icon-button" type="button" aria-label="Lock vault" title="Lock vault">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="1"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="toolbar">
+          <label class="search-wrap" for="searchInput">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input id="searchInput" type="search" placeholder="Search notes" autocomplete="off">
+          </label>
+        </div>
+
+        <nav id="filters" class="filters" aria-label="Note filters"></nav>
+
+        <section id="emptyState" class="empty-state hidden">
+          <p class="empty-title">Nothing here yet.</p>
+          <p class="thin-text">Create your first note and keep it inside your vault.</p>
+        </section>
+
+        <section id="notesList" class="notes-list" aria-live="polite"></section>
+      </main>
+
+      <button id="newNoteButton" class="floating-button" type="button" aria-label="New note" title="New note">+</button>
+    </section>
+
+    <dialog id="noteDialog" class="sheet-dialog">
+      <form id="noteForm" class="sheet" method="dialog">
+        <div class="sheet-header">
+          <button id="cancelNoteButton" class="text-button" type="button">Cancel</button>
+          <p id="sheetTitle" class="sheet-title">New note</p>
+          <button id="saveNoteButton" class="text-button strong" type="submit">Save</button>
+        </div>
+
+        <label class="field-label" for="typeInput">Type</label>
+        <select id="typeInput" class="text-input select-input">
+          <option value="Note">Note</option>
+          <option value="Motivation">Motivation</option>
+          <option value="Finding">Finding</option>
+          <option value="Learning">Learning</option>
+        </select>
+
+        <label class="field-label" for="titleInput">Title</label>
+        <input id="titleInput" class="text-input" type="text" maxlength="120" placeholder="Untitled" autocomplete="off">
+
+        <label class="field-label" for="bodyInput">Content</label>
+        <textarea id="bodyInput" class="note-textarea" placeholder="Write anything worth keeping..." spellcheck="true"></textarea>
+
+        <div id="editActions" class="edit-actions hidden">
+          <button id="deleteNoteButton" class="danger-button" type="button">Delete note</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="settingsDialog" class="sheet-dialog">
+      <section class="sheet settings-sheet">
+        <div class="sheet-header">
+          <button id="closeSettingsButton" class="text-button" type="button">Close</button>
+          <p class="sheet-title">Settings</p>
+          <span class="sheet-spacer"></span>
+        </div>
+
+        <section class="settings-group">
+          <p class="settings-title">Backup</p>
+          <p class="thin-text">Exports are encrypted. Your master password is still required to read the backup.</p>
+          <div class="settings-actions">
+            <button id="exportButton" class="secondary-button" type="button">Export encrypted backup</button>
+            <label class="secondary-button file-button" for="importInput">Import encrypted backup</label>
+            <input id="importInput" type="file" accept="application/json,.json" hidden>
+          </div>
+        </section>
+
+        <section class="settings-group">
+          <p class="settings-title">Security</p>
+          <button id="changePasswordButton" class="secondary-button" type="button">Change master password</button>
+          <p class="thin-text">Vault locks automatically when the app is closed or refreshed.</p>
+        </section>
+
+        <section class="settings-group">
+          <p class="settings-title">Storage</p>
+          <p id="storageText" class="thin-text">0 notes</p>
+        </section>
+      </section>
+    </dialog>
+
+    <dialog id="passwordDialog" class="sheet-dialog">
+      <form id="passwordForm" class="sheet compact-sheet" method="dialog">
+        <div class="sheet-header">
+          <button id="cancelPasswordButton" class="text-button" type="button">Cancel</button>
+          <p class="sheet-title">Change password</p>
+          <button class="text-button strong" type="submit">Save</button>
+        </div>
+        <label class="field-label" for="currentPasswordInput">Current password</label>
+        <input id="currentPasswordInput" class="text-input" type="password" required autocomplete="current-password">
+        <label class="field-label" for="newPasswordInput">New password</label>
+        <input id="newPasswordInput" class="text-input" type="password" minlength="8" required autocomplete="new-password">
+        <label class="field-label" for="newPasswordConfirmInput">Confirm new password</label>
+        <input id="newPasswordConfirmInput" class="text-input" type="password" minlength="8" required autocomplete="new-password">
+        <p id="passwordError" class="error-text" role="alert"></p>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
