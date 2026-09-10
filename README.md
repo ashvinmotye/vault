@@ -5,7 +5,9 @@ Minimal local-first encrypted notes PWA.
 ## Included
 - Master-password encrypted local vault using PBKDF2-SHA256 + AES-256-GCM.
 - Notes, Motivation, Finding, and Learning types.
-- Search and type filters.
+- Category-gated note lists: no saved notes are shown until a category is selected.
+- Title-only category lists with search inside the selected category.
+- Notes open in full read-only view with an explicit Edit action.
 - Encrypted JSON export/import.
 - Master password change.
 - Dark mode by default with optional light mode.

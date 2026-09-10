@@ -75,28 +75,38 @@
     <dialog id="noteDialog" class="sheet-dialog">
       <form id="noteForm" class="sheet" method="dialog">
         <div class="sheet-header">
-          <button id="cancelNoteButton" class="text-button" type="button">Cancel</button>
-          <p id="sheetTitle" class="sheet-title">New note</p>
-          <button id="saveNoteButton" class="text-button strong" type="submit">Save</button>
+          <button id="cancelNoteButton" class="text-button" type="button">Close</button>
+          <p id="sheetTitle" class="sheet-title">Note</p>
+          <button id="editNoteButton" class="text-button strong" type="button">Edit</button>
         </div>
 
-        <label class="field-label" for="typeInput">Type</label>
-        <select id="typeInput" class="text-input select-input">
-          <option value="Note">Note</option>
-          <option value="Motivation">Motivation</option>
-          <option value="Finding">Finding</option>
-          <option value="Learning">Learning</option>
-        </select>
-
-        <label class="field-label" for="titleInput">Title</label>
-        <input id="titleInput" class="text-input" type="text" maxlength="120" placeholder="Untitled" autocomplete="off">
-
-        <label class="field-label" for="bodyInput">Content</label>
-        <textarea id="bodyInput" class="note-textarea" placeholder="Write anything worth keeping..." spellcheck="true"></textarea>
-
-        <div id="editActions" class="edit-actions hidden">
-          <button id="deleteNoteButton" class="danger-button" type="button">Delete note</button>
+        <div id="existingNoteActions" class="existing-note-actions hidden">
+          <button id="deleteNoteButton" class="text-button delete-text" type="button">Delete note</button>
         </div>
+
+        <section id="noteView" class="note-view hidden" aria-live="polite">
+          <p id="viewType" class="note-view-type"></p>
+          <h2 id="viewTitle" class="note-view-title"></h2>
+          <div id="viewBody" class="note-view-body"></div>
+        </section>
+
+        <section id="noteEdit" class="note-edit hidden">
+          <label class="field-label" for="typeInput">Type</label>
+          <select id="typeInput" class="text-input select-input">
+            <option value="Note">Note</option>
+            <option value="Motivation">Motivation</option>
+            <option value="Finding">Finding</option>
+            <option value="Learning">Learning</option>
+          </select>
+
+          <label class="field-label" for="titleInput">Title</label>
+          <input id="titleInput" class="text-input" type="text" maxlength="120" placeholder="Untitled" autocomplete="off">
+
+          <label class="field-label" for="bodyInput">Content</label>
+          <textarea id="bodyInput" class="note-textarea" placeholder="Write anything worth keeping..." spellcheck="true"></textarea>
+
+          <button id="saveNoteButton" class="primary-button note-save-button" type="submit">Save</button>
+        </section>
       </form>
     </dialog>
 

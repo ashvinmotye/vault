@@ -5,14 +5,15 @@
   const STORAGE_KEY = "vault.encrypted.v1";
   const THEME_KEY = "vault.theme";
   const ITERATIONS = 250000;
-  const TYPES = ["All", "Note", "Motivation", "Finding", "Learning"];
+  const TYPES = ["Note", "Motivation", "Finding", "Learning"];
 
   const state = {
     vault: null,
     key: null,
-    filter: "All",
+    filter: null,
     query: "",
     editingId: null,
+    noteMode: null,
     toastTimer: null,
   };
 
@@ -23,8 +24,10 @@
     authSubmit: $("authSubmit"), authError: $("authError"), filters: $("filters"), notesList: $("notesList"),
     emptyState: $("emptyState"), searchInput: $("searchInput"), newNoteButton: $("newNoteButton"),
     noteDialog: $("noteDialog"), noteForm: $("noteForm"), sheetTitle: $("sheetTitle"), typeInput: $("typeInput"),
-    titleInput: $("titleInput"), bodyInput: $("bodyInput"), editActions: $("editActions"),
-    deleteNoteButton: $("deleteNoteButton"), cancelNoteButton: $("cancelNoteButton"), saveNoteButton: $("saveNoteButton"),
+    titleInput: $("titleInput"), bodyInput: $("bodyInput"), noteView: $("noteView"), noteEdit: $("noteEdit"),
+    viewType: $("viewType"), viewTitle: $("viewTitle"), viewBody: $("viewBody"), existingNoteActions: $("existingNoteActions"),
+    deleteNoteButton: $("deleteNoteButton"), cancelNoteButton: $("cancelNoteButton"), editNoteButton: $("editNoteButton"),
+    saveNoteButton: $("saveNoteButton"),
     themeButton: $("themeButton"), lockButton: $("lockButton"), settingsButton: $("settingsButton"),
     settingsDialog: $("settingsDialog"), closeSettingsButton: $("closeSettingsButton"), storageText: $("storageText"),
     exportButton: $("exportButton"), importInput: $("importInput"), changePasswordButton: $("changePasswordButton"),
@@ -140,7 +143,7 @@
     els.mainView.classList.remove("hidden");
     els.searchInput.value = "";
     state.query = "";
-    state.filter = "All";
+    state.filter = null;
     renderFilters();
     renderNotes();
     updateStorageText();
@@ -150,6 +153,7 @@
     state.vault = null;
     state.key = null;
     state.editingId = null;
+    state.noteMode = null;
     closeDialog(els.noteDialog);
     closeDialog(els.settingsDialog);
     closeDialog(els.passwordDialog);
@@ -170,30 +174,42 @@
   }
 
   function filteredNotes() {
-    if (!state.vault) return [];
+    if (!state.vault || !state.filter) return [];
     const q = state.query.trim().toLocaleLowerCase();
     return [...state.vault.notes]
-      .filter(note => state.filter === "All" || note.type === state.filter)
-      .filter(note => !q || `${note.title}\n${note.body}\n${note.type}`.toLocaleLowerCase().includes(q))
+      .filter(note => note.type === state.filter)
+      .filter(note => !q || `${note.title}\n${note.body}`.toLocaleLowerCase().includes(q))
       .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
   }
 
   function renderNotes() {
     const notes = filteredNotes();
     els.notesList.innerHTML = "";
-    els.emptyState.classList.toggle("hidden", notes.length > 0);
+
+    const emptyTitle = els.emptyState.querySelector(".empty-title");
+    const emptyCopy = els.emptyState.querySelector(".thin-text");
+    if (!state.filter) {
+      emptyTitle.textContent = "Choose a category.";
+      emptyCopy.textContent = "Select a category to view its notes.";
+      els.emptyState.classList.remove("hidden");
+      return;
+    }
+
+    if (!notes.length) {
+      emptyTitle.textContent = state.query.trim() ? "No matches." : "Nothing here yet.";
+      emptyCopy.textContent = state.query.trim() ? "Try a different search." : `Create your first ${state.filter.toLocaleLowerCase()} entry.`;
+      els.emptyState.classList.remove("hidden");
+      return;
+    }
+
+    els.emptyState.classList.add("hidden");
     notes.forEach(note => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "note-card";
-      const date = new Intl.DateTimeFormat(undefined, { day: "2-digit", month: "short", year: "numeric" }).format(new Date(note.updatedAt));
       const title = note.title.trim() || "Untitled";
-      const preview = note.body.trim().replace(/\s+/g, " ").slice(0, 180) || "No content";
-      button.innerHTML = `
-        <div class="note-meta"><span>${escapeHtml(note.type)}</span><span>${escapeHtml(date)}</span></div>
-        <h2 class="note-title">${escapeHtml(title)}</h2>
-        <p class="note-preview">${escapeHtml(preview)}</p>`;
-      button.addEventListener("click", () => openEditNote(note.id));
+      button.innerHTML = `<h2 class="note-title">${escapeHtml(title)}</h2>`;
+      button.addEventListener("click", () => openViewNote(note.id));
       els.notesList.appendChild(button);
     });
   }
@@ -202,27 +218,53 @@
     return String(value).replace(/[&<>'"]/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" }[char]));
   }
 
+  function setNoteMode(mode) {
+    state.noteMode = mode;
+    const isView = mode === "view";
+    const isExisting = Boolean(state.editingId);
+    els.noteView.classList.toggle("hidden", !isView);
+    els.noteEdit.classList.toggle("hidden", isView);
+    els.existingNoteActions.classList.toggle("hidden", !isExisting);
+    els.editNoteButton.classList.toggle("hidden", !isView);
+    els.cancelNoteButton.textContent = isView ? "Close" : "Cancel";
+    els.sheetTitle.textContent = isView ? "Note" : (isExisting ? "Edit note" : "New note");
+  }
+
   function openNewNote() {
     state.editingId = null;
-    els.sheetTitle.textContent = "New note";
-    els.typeInput.value = "Note";
+    els.typeInput.value = state.filter || "Note";
     els.titleInput.value = "";
     els.bodyInput.value = "";
-    els.editActions.classList.add("hidden");
+    setNoteMode("edit");
     openDialog(els.noteDialog);
     setTimeout(() => els.titleInput.focus(), 0);
   }
 
-  function openEditNote(id) {
-    const note = state.vault.notes.find(item => item.id === id);
-    if (!note) return;
-    state.editingId = id;
-    els.sheetTitle.textContent = "Edit note";
+  function populateNoteFields(note) {
     els.typeInput.value = note.type;
     els.titleInput.value = note.title;
     els.bodyInput.value = note.body;
-    els.editActions.classList.remove("hidden");
+    els.viewType.textContent = note.type;
+    els.viewTitle.textContent = note.title.trim() || "Untitled";
+    els.viewBody.textContent = note.body || "";
+  }
+
+  function openViewNote(id) {
+    const note = state.vault.notes.find(item => item.id === id);
+    if (!note) return;
+    state.editingId = id;
+    populateNoteFields(note);
+    setNoteMode("view");
     openDialog(els.noteDialog);
+  }
+
+  function enableNoteEditing() {
+    if (!state.editingId) return;
+    const note = state.vault.notes.find(item => item.id === state.editingId);
+    if (!note) return;
+    populateNoteFields(note);
+    setNoteMode("edit");
+    setTimeout(() => els.titleInput.focus(), 0);
   }
 
   async function saveNote(event) {
@@ -240,8 +282,11 @@
       state.vault.notes.push({ id: newId(), title, body, type, createdAt: timestamp, updatedAt: timestamp });
     }
     state.vault.updatedAt = timestamp;
+    state.filter = type;
     await persistWithKey();
     closeDialog(els.noteDialog);
+    state.noteMode = null;
+    renderFilters();
     renderNotes();
     showToast("Saved.");
   }
@@ -253,6 +298,8 @@
     state.vault.updatedAt = nowIso();
     await persistWithKey();
     closeDialog(els.noteDialog);
+    state.editingId = null;
+    state.noteMode = null;
     renderNotes();
     showToast("Deleted.");
   }
@@ -375,7 +422,20 @@
     els.newNoteButton.addEventListener("click", openNewNote);
     els.noteForm.addEventListener("submit", saveNote);
     els.deleteNoteButton.addEventListener("click", deleteNote);
-    els.cancelNoteButton.addEventListener("click", () => closeDialog(els.noteDialog));
+    els.editNoteButton.addEventListener("click", enableNoteEditing);
+    els.cancelNoteButton.addEventListener("click", () => {
+      if (state.noteMode === "edit" && state.editingId) {
+        const note = state.vault.notes.find(item => item.id === state.editingId);
+        if (note) {
+          populateNoteFields(note);
+          setNoteMode("view");
+          return;
+        }
+      }
+      closeDialog(els.noteDialog);
+      state.noteMode = null;
+      state.editingId = null;
+    });
     els.themeButton.addEventListener("click", toggleTheme);
     els.lockButton.addEventListener("click", lockVault);
     els.settingsButton.addEventListener("click", () => { updateStorageText(); openDialog(els.settingsDialog); });
@@ -388,7 +448,13 @@
 
     [els.noteDialog, els.settingsDialog, els.passwordDialog].forEach(dialog => {
       dialog.addEventListener("click", event => {
-        if (event.target === dialog) closeDialog(dialog);
+        if (event.target === dialog) {
+          closeDialog(dialog);
+          if (dialog === els.noteDialog) {
+            state.noteMode = null;
+            state.editingId = null;
+          }
+        }
       });
     });
   }
