@@ -1,4 +1,4 @@
-const CACHE = "vault-static-v1.4";
+const CACHE = "vault-static-v1.5";
 const ASSETS = [
   "./",
   "./index.html",

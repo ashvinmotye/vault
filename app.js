@@ -257,6 +257,7 @@
     populateNoteFields(note);
     setNoteMode("view");
     openDialog(els.noteDialog);
+    requestAnimationFrame(() => els.viewTitle.focus({ preventScroll: true }));
   }
 
   function enableNoteEditing() {
