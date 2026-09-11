@@ -24,3 +24,9 @@ Use any local static web server. For example:
 Then open http://localhost:8080 from inside this folder.
 
 For PWA installation on another device, serve it over HTTPS (or localhost).
+
+
+## Security update
+- Automatically locks after 30 seconds without activity.
+- Locks immediately when the app is backgrounded or the device screen is locked.
+- Browser-native focus rings use the Vault dark colour instead of blue.

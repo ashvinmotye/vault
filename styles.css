@@ -301,3 +301,18 @@ body.light .sheet-dialog::backdrop { background: var(--light); }
 }
 
 .note-view-title:focus { outline: none; }
+
+
+/* Replace browser-native blue focus rings with Vault's dark tone. */
+button:focus,
+button:focus-visible,
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible,
+[tabindex]:focus,
+[tabindex]:focus-visible {
+  outline-color: var(--dark) !important;
+}

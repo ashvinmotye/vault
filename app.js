@@ -5,6 +5,7 @@
   const STORAGE_KEY = "vault.encrypted.v1";
   const THEME_KEY = "vault.theme";
   const ITERATIONS = 250000;
+  const INACTIVITY_MS = 30000;
   const TYPES = ["Note", "Motivation", "Finding", "Learning"];
 
   const state = {
@@ -15,6 +16,7 @@
     editingId: null,
     noteMode: null,
     toastTimer: null,
+    inactivityTimer: null,
   };
 
   const $ = (id) => document.getElementById(id);
@@ -121,7 +123,21 @@
     updateStorageText();
   }
 
+  function clearInactivityTimer() {
+    if (state.inactivityTimer) {
+      clearTimeout(state.inactivityTimer);
+      state.inactivityTimer = null;
+    }
+  }
+
+  function resetInactivityTimer() {
+    clearInactivityTimer();
+    if (!state.vault || !state.key) return;
+    state.inactivityTimer = setTimeout(() => lockVault(), INACTIVITY_MS);
+  }
+
   function showAuth() {
+    clearInactivityTimer();
     const exists = hasVault();
     els.authCopy.textContent = exists
       ? "Enter your master password to decrypt this vault on this device."
@@ -147,9 +163,11 @@
     renderFilters();
     renderNotes();
     updateStorageText();
+    resetInactivityTimer();
   }
 
   function lockVault() {
+    clearInactivityTimer();
     state.vault = null;
     state.key = null;
     state.editingId = null;
@@ -463,6 +481,18 @@
           }
         }
       });
+    });
+
+    ["pointerdown", "keydown", "input", "scroll", "touchstart"].forEach(eventName => {
+      document.addEventListener(eventName, resetInactivityTimer, { passive: true });
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden && state.vault && state.key) lockVault();
+    });
+
+    window.addEventListener("pagehide", () => {
+      if (state.vault && state.key) lockVault();
     });
   }
 
