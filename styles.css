@@ -48,7 +48,7 @@ body.light .icon-button,
 body.light .text-button,
 body.light .danger-button,
 body.light .filter-button,
-body.light .delete-text {
+body.light .sheet-icon-action {
   color: var(--dark);
   border-color: var(--dark);
 }
@@ -245,14 +245,33 @@ body.light .sheet-dialog::backdrop { background: var(--light); }
 }
 .sheet-header .text-button:last-child { text-align: right; }
 .text-button.strong { font-weight: 900; }
+.sheet-close-button { justify-self: end; }
+.sheet-icon-action {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  justify-self: start;
+  padding: 7px;
+  border: 0;
+  background: transparent;
+  color: var(--light);
+}
+.sheet-icon-action svg { width: 20px; height: 20px; fill: currentColor; }
 .existing-note-actions { display: flex; justify-content: flex-end; margin-top: -2px; }
-.delete-text { font-weight: 400; }
 .note-view { display: grid; gap: 18px; padding: 12px 0 30px; }
 .note-view-type { margin: 0; font-size: 11px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
 .note-view-title { margin: 0; font-size: clamp(28px, 8vw, 44px); line-height: 1.08; font-weight: 900; letter-spacing: -0.04em; overflow-wrap: anywhere; }
 .note-view-body { font-size: 16px; line-height: 1.7; font-weight: 100; white-space: pre-wrap; overflow-wrap: anywhere; }
 .note-edit { display: grid; gap: 12px; }
-.note-save-button { width: 100%; margin-top: 8px; }
+.note-form-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+.note-cancel-button,
+.note-save-button { width: 100%; margin-top: 0; text-align: center; }
 .settings-sheet { gap: 0; }
 .settings-group { padding: 24px 0; border-bottom: 1px solid var(--light); display: grid; gap: 12px; }
 .settings-title { margin: 0; font-size: 15px; font-weight: 900; }

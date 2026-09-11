@@ -75,13 +75,15 @@
     <dialog id="noteDialog" class="sheet-dialog">
       <form id="noteForm" class="sheet" method="dialog">
         <div class="sheet-header">
-          <button id="cancelNoteButton" class="text-button" type="button">Close</button>
+          <button id="deleteNoteButton" class="sheet-icon-action hidden" type="button" aria-label="Delete note" title="Delete note">
+            <svg viewBox="0 0 1024 1024" aria-hidden="true"><path d="M160 256H96a32 32 0 010-64h256V95.936a32 32 0 0132-32h256a32 32 0 0132 32V192h256a32 32 0 110 64h-64v672a32 32 0 01-32 32H192a32 32 0 01-32-32V256zm448-64v-64H416v64h192zM224 896h576V256H224v640zm192-128a32 32 0 01-32-32V416a32 32 0 0164 0v320a32 32 0 01-32 32zm192 0a32 32 0 01-32-32V416a32 32 0 0164 0v320a32 32 0 01-32 32z"/></svg>
+          </button>
           <p id="sheetTitle" class="sheet-title">Note</p>
-          <button id="editNoteButton" class="text-button strong" type="button">Edit</button>
+          <button id="closeNoteButton" class="text-button sheet-close-button hidden" type="button">Close</button>
         </div>
 
         <div id="existingNoteActions" class="existing-note-actions hidden">
-          <button id="deleteNoteButton" class="text-button delete-text" type="button">Delete note</button>
+          <button id="editNoteButton" class="text-button strong" type="button">Edit</button>
         </div>
 
         <section id="noteView" class="note-view hidden" aria-live="polite">
@@ -105,7 +107,10 @@
           <label class="field-label" for="bodyInput">Content</label>
           <textarea id="bodyInput" class="note-textarea" placeholder="Write anything worth keeping..." spellcheck="true"></textarea>
 
-          <button id="saveNoteButton" class="primary-button note-save-button" type="submit">Save</button>
+          <div class="note-form-actions">
+            <button id="cancelEditButton" class="secondary-button note-cancel-button" type="button">Cancel</button>
+            <button id="saveNoteButton" class="primary-button note-save-button" type="submit">Save</button>
+          </div>
         </section>
       </form>
     </dialog>

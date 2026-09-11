@@ -26,8 +26,8 @@
     noteDialog: $("noteDialog"), noteForm: $("noteForm"), sheetTitle: $("sheetTitle"), typeInput: $("typeInput"),
     titleInput: $("titleInput"), bodyInput: $("bodyInput"), noteView: $("noteView"), noteEdit: $("noteEdit"),
     viewType: $("viewType"), viewTitle: $("viewTitle"), viewBody: $("viewBody"), existingNoteActions: $("existingNoteActions"),
-    deleteNoteButton: $("deleteNoteButton"), cancelNoteButton: $("cancelNoteButton"), editNoteButton: $("editNoteButton"),
-    saveNoteButton: $("saveNoteButton"),
+    deleteNoteButton: $("deleteNoteButton"), closeNoteButton: $("closeNoteButton"), editNoteButton: $("editNoteButton"),
+    cancelEditButton: $("cancelEditButton"), saveNoteButton: $("saveNoteButton"),
     themeButton: $("themeButton"), lockButton: $("lockButton"), settingsButton: $("settingsButton"),
     settingsDialog: $("settingsDialog"), closeSettingsButton: $("closeSettingsButton"), storageText: $("storageText"),
     exportButton: $("exportButton"), importInput: $("importInput"), changePasswordButton: $("changePasswordButton"),
@@ -224,9 +224,10 @@
     const isExisting = Boolean(state.editingId);
     els.noteView.classList.toggle("hidden", !isView);
     els.noteEdit.classList.toggle("hidden", isView);
-    els.existingNoteActions.classList.toggle("hidden", !isExisting);
-    els.editNoteButton.classList.toggle("hidden", !isView);
-    els.cancelNoteButton.textContent = isView ? "Close" : "Cancel";
+    els.deleteNoteButton.classList.toggle("hidden", !(isView && isExisting));
+    els.closeNoteButton.classList.toggle("hidden", !isView);
+    els.existingNoteActions.classList.toggle("hidden", !(isView && isExisting));
+    els.editNoteButton.classList.toggle("hidden", !(isView && isExisting));
     els.sheetTitle.textContent = isView ? "Note" : (isExisting ? "Edit note" : "New note");
   }
 
@@ -423,8 +424,13 @@
     els.noteForm.addEventListener("submit", saveNote);
     els.deleteNoteButton.addEventListener("click", deleteNote);
     els.editNoteButton.addEventListener("click", enableNoteEditing);
-    els.cancelNoteButton.addEventListener("click", () => {
-      if (state.noteMode === "edit" && state.editingId) {
+    els.closeNoteButton.addEventListener("click", () => {
+      closeDialog(els.noteDialog);
+      state.noteMode = null;
+      state.editingId = null;
+    });
+    els.cancelEditButton.addEventListener("click", () => {
+      if (state.editingId) {
         const note = state.vault.notes.find(item => item.id === state.editingId);
         if (note) {
           populateNoteFields(note);
