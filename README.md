@@ -30,3 +30,4 @@ For PWA installation on another device, serve it over HTTPS (or localhost).
 - Automatically locks after 30 seconds without activity.
 - Locks immediately when the app is backgrounded or the device screen is locked.
 - Browser-native focus rings use the Vault dark colour instead of blue.
+- A full-screen dark privacy shield covers Vault before backgrounding/app-switcher snapshots, then remains until the locked screen has painted again.

@@ -35,7 +35,8 @@
     exportButton: $("exportButton"), importInput: $("importInput"), changePasswordButton: $("changePasswordButton"),
     passwordDialog: $("passwordDialog"), passwordForm: $("passwordForm"), cancelPasswordButton: $("cancelPasswordButton"),
     currentPasswordInput: $("currentPasswordInput"), newPasswordInput: $("newPasswordInput"),
-    newPasswordConfirmInput: $("newPasswordConfirmInput"), passwordError: $("passwordError"), toast: $("toast")
+    newPasswordConfirmInput: $("newPasswordConfirmInput"), passwordError: $("passwordError"), toast: $("toast"),
+    privacyShield: $("privacyShield")
   };
 
   function hasVault() { return Boolean(localStorage.getItem(STORAGE_KEY)); }
@@ -176,6 +177,27 @@
     closeDialog(els.settingsDialog);
     closeDialog(els.passwordDialog);
     showAuth();
+  }
+
+  function showPrivacyShield() {
+    if (!els.privacyShield) return;
+    els.privacyShield.classList.remove("hidden");
+    // Force the shield to paint immediately before iOS captures the app snapshot.
+    void els.privacyShield.offsetHeight;
+  }
+
+  function hidePrivacyShieldAfterLockPaint() {
+    if (!els.privacyShield || document.hidden) return;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!document.hidden) els.privacyShield.classList.add("hidden");
+      });
+    });
+  }
+
+  function privacyLock() {
+    showPrivacyShield();
+    if (state.vault && state.key) lockVault();
   }
 
   function renderFilters() {
@@ -488,12 +510,20 @@
     });
 
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden && state.vault && state.key) lockVault();
+      if (document.hidden) {
+        privacyLock();
+      } else {
+        hidePrivacyShieldAfterLockPaint();
+      }
     });
 
-    window.addEventListener("pagehide", () => {
-      if (state.vault && state.key) lockVault();
+    window.addEventListener("blur", () => {
+      if (state.vault && state.key) privacyLock();
     });
+
+    window.addEventListener("pagehide", privacyLock);
+    window.addEventListener("pageshow", hidePrivacyShieldAfterLockPaint);
+    window.addEventListener("focus", hidePrivacyShieldAfterLockPaint);
   }
 
   async function registerServiceWorker() {
